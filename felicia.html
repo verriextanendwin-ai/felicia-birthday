@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Happy Birthday Felicia</title>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#ff9ecf,#ff6fb1,#ff3e9d);
+color:white;
+text-align:center;
+overflow-x:hidden;
+}
+
+/* loading */
+
+#intro{
+position:fixed;
+width:100%;
+height:100%;
+background:black;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+font-size:55px;
+letter-spacing:5px;
+animation:glow 2s infinite alternate;
+z-index:999;
+}
+
+@keyframes glow{
+from{text-shadow:0 0 10px pink}
+to{text-shadow:0 0 40px pink}
+}
+
+#bar{
+width:220px;
+height:6px;
+background:#333;
+margin-top:20px;
+}
+
+#progress{
+height:6px;
+width:0%;
+background:pink;
+}
+
+/* stars */
+
+.star{
+position:fixed;
+width:2px;
+height:2px;
+background:white;
+animation:twinkle 3s infinite;
+}
+
+@keyframes twinkle{
+0%{opacity:0.3}
+50%{opacity:1}
+100%{opacity:0.3}
+}
+
+/* title */
+
+h1{
+font-size:55px;
+margin-top:40px;
+animation:glowTitle 2s infinite alternate;
+}
+
+@keyframes glowTitle{
+from{text-shadow:0 0 10px white}
+to{text-shadow:0 0 35px pink}
+}
+
+/* cake */
+
+.cake{
+font-size:120px;
+cursor:pointer;
+transition:.3s;
+}
+
+.cake:hover{
+transform:scale(1.2) rotate(6deg);
+}
+
+/* gallery */
+
+.gallery img{
+width:260px;
+height:260px;
+border-radius:20px;
+object-fit:cover;
+box-shadow:0 0 40px pink;
+margin-top:20px;
+}
+
+/* text */
+
+.text{
+max-width:700px;
+margin:auto;
+font-size:18px;
+line-height:1.6;
+padding:20px;
+}
+
+/* buttons */
+
+button{
+margin:8px;
+padding:10px 18px;
+border:none;
+border-radius:20px;
+background:#ff2f8e;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+/* emoji rain */
+
+.emoji{
+position:fixed;
+font-size:30px;
+animation:fall 5s linear infinite;
+}
+
+@keyframes fall{
+0%{transform:translateY(-10vh)}
+100%{transform:translateY(110vh)}
+}
+
+/* hearts */
+
+.heart{
+position:fixed;
+font-size:22px;
+animation:float 6s linear infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(100vh)}
+100%{transform:translateY(-10vh)}
+}
+
+/* game */
+
+#game{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+overflow:hidden;
+}
+
+.catch{
+position:absolute;
+font-size:35px;
+cursor:pointer;
+top:-50px;
+}
+
+#score{
+position:absolute;
+top:10px;
+left:10px;
+font-size:22px;
+}
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+pointer-events:none;
+}
+
+#countdown{
+font-size:24px;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="intro">
+💖 FELICIA 💖
+<div id="bar"><div id="progress"></div></div>
+</div>
+
+<h1>🎉 Happy Birthday Felicia 🎉</h1>
+
+<div id="countdown"></div>
+
+<div class="text">
+Hari ini adalah hari yang sangat spesial, karena pada tanggal 13 Maret lahir seseorang yang luar biasa ke dunia.
+
+Felicia, semoga di umur yang baru ini hidupmu dipenuhi dengan kebahagiaan, tawa, dan mimpi-mimpi yang menjadi kenyataan.
+
+Terima kasih sudah menjadi orang yang selalu membawa energi positif dan membuat hari-hari terasa lebih menyenangkan.
+
+Selamat ulang tahun Felicia 🎂  
+Semoga hari ini menjadi salah satu hari paling bahagia untukmu 💖
+</div>
+
+<div class="cake" onclick="celebrate()">🎂</div>
+
+<div class="gallery">
+<img id="photo" src="foto1.jpg">
+</div>
+
+<div>
+<button onclick="playMusic()">▶ Play Music</button>
+<button onclick="pauseMusic()">⏸ Pause Music</button>
+<button onclick="showMessage()">💌 Message</button>
+<button onclick="startGame()">🎮 Game</button>
+<button onclick="surprise()">🎁 Surprise</button>
+<button onclick="celebrate()">🎊 Party</button>
+</div>
+
+<div id="msg"></div>
+
+<div id="game">
+<div id="score">Score: 0</div>
+<button onclick="stopGame()" style="position:absolute;top:10px;right:10px">Exit</button>
+</div>
+
+<audio id="music" loop>
+<source src="music.mp3">
+</audio>
+
+<canvas id="fireworks"></canvas>
+
+<script>
+
+/* loading */
+
+let p=0
+let load=setInterval(()=>{
+p+=2
+document.getElementById("progress").style.width=p+"%"
+if(p>=100){
+clearInterval(load)
+document.getElementById("intro").style.display="none"
+}
+},40)
+
+/* stars */
+
+for(let i=0;i<300;i++){
+let star=document.createElement("div")
+star.className="star"
+star.style.top=Math.random()*100+"vh"
+star.style.left=Math.random()*100+"vw"
+document.body.appendChild(star)
+}
+
+/* slideshow */
+
+let photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg"]
+let i=0
+
+setInterval(()=>{
+i++
+if(i>=photos.length)i=0
+document.getElementById("photo").src=photos[i]
+},3000)
+
+/* typing message */
+
+let text="Selamat ulang tahun Felicia! Semoga semua mimpi dan kebahagiaan selalu bersamamu 💖"
+
+function showMessage(){
+
+let i=0
+let target=document.getElementById("msg")
+target.innerHTML=""
+
+function typing(){
+if(i<text.length){
+target.innerHTML+=text.charAt(i)
+i++
+setTimeout(typing,40)
+}
+}
+
+typing()
+
+}
+
+/* countdown */
+
+function getNextBirthday(){
+
+let now=new Date()
+let year=now.getFullYear()
+
+let birthday=new Date(year,2,13)
+
+if(now>birthday){
+birthday=new Date(year+1,2,13)
+}
+
+return birthday.getTime()
+
+}
+
+let target=getNextBirthday()
+
+setInterval(()=>{
+
+let now=new Date().getTime()
+let distance=target-now
+
+let d=Math.floor(distance/(1000*60*60*24))
+let h=Math.floor((distance%(1000*60*60*24))/(1000*60*60))
+let m=Math.floor((distance%(1000*60*60))/(1000*60))
+let s=Math.floor((distance%(1000*60))/1000)
+
+document.getElementById("countdown").innerHTML=
+"Countdown ke ulang tahun Felicia: "+d+" hari "+h+" jam "+m+" menit "+s+" detik"
+
+},1000)
+
+/* music */
+
+function playMusic(){
+document.getElementById("music").play()
+}
+
+function pauseMusic(){
+document.getElementById("music").pause()
+}
+
+/* celebrate */
+
+function celebrate(){
+
+document.getElementById("music").play()
+
+confetti({
+particleCount:200,
+spread:120,
+origin:{y:0.6}
+})
+
+emojiRain()
+hearts()
+bigFirework()
+
+}
+
+/* emoji rain */
+
+function emojiRain(){
+
+let emojis=["🎉","🎊","🥳","✨","🎂","⭐"]
+
+for(let i=0;i<80;i++){
+
+let e=document.createElement("div")
+e.className="emoji"
+
+e.innerHTML=emojis[Math.floor(Math.random()*emojis.length)]
+e.style.left=Math.random()*100+"vw"
+
+document.body.appendChild(e)
+
+setTimeout(()=>e.remove(),5000)
+
+}
+
+}
+
+/* hearts */
+
+function hearts(){
+
+for(let i=0;i<40;i++){
+
+let h=document.createElement("div")
+h.className="heart"
+h.innerHTML="💖"
+
+h.style.left=Math.random()*100+"vw"
+
+document.body.appendChild(h)
+
+setTimeout(()=>h.remove(),6000)
+
+}
+
+}
+
+/* fireworks */
+
+let canvas=document.getElementById("fireworks")
+let ctx=canvas.getContext("2d")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+let particles=[]
+
+function bigFirework(){
+
+for(let i=0;i<200;i++){
+
+particles.push({
+x:canvas.width/2,
+y:canvas.height/2,
+vx:(Math.random()-0.5)*12,
+vy:(Math.random()-0.5)*12,
+life:120
+})
+
+}
+
+}
+
+function animate(){
+
+requestAnimationFrame(animate)
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+particles.forEach((p,index)=>{
+
+p.x+=p.vx
+p.y+=p.vy
+p.life--
+
+ctx.fillStyle="white"
+ctx.fillRect(p.x,p.y,3,3)
+
+if(p.life<=0)particles.splice(index,1)
+
+})
+
+}
+
+animate()
+
+/* surprise */
+
+function surprise(){
+alert("You are amazing Felicia 💖")
+}
+
+/* game */
+
+/* ================= NEW HEART GAME ================= */
+
+let score=0
+let heartInterval
+
+function startGame(){
+
+document.getElementById("game").style.display="block"
+score=0
+document.getElementById("score").innerText="Score : 0"
+
+heartInterval=setInterval(spawnHeart,1000)
+
+}
+
+function stopGame(){
+
+document.getElementById("game").style.display="none"
+clearInterval(heartInterval)
+
+document.querySelectorAll(".heartGame").forEach(h=>h.remove())
+
+}
+
+function spawnHeart(){
+
+let heart=document.createElement("div")
+
+heart.innerHTML="💖"
+heart.className="heartGame"
+
+heart.style.position="absolute"
+heart.style.fontSize="30px"
+heart.style.cursor="pointer"
+
+heart.style.left=Math.random()*90+"%"
+heart.style.top=Math.random()*250+"px"
+
+heart.onclick=function(){
+
+score++
+
+document.getElementById("score").innerText="Score : "+score
+
+heart.remove()
+
+fireworkEffect()
+
+}
+
+document.getElementById("game").appendChild(heart)
+
+setTimeout(()=>heart.remove(),3000)
+
+}
+
+/* FIREWORK EFFECT */
+
+function fireworkEffect(){
+
+for(let i=0;i<20;i++){
+
+let spark=document.createElement("div")
+
+spark.innerHTML="✨"
+
+spark.style.position="fixed"
+spark.style.left=Math.random()*100+"vw"
+spark.style.top=Math.random()*100+"vh"
+
+document.body.appendChild(spark)
+
+setTimeout(()=>spark.remove(),1000)
+
+}
+
+}
+
+/* EXTRA EFFECTS (gabungan coding kedua) */
+
+/* sparkle cursor */
+
+document.addEventListener("mousemove",(e)=>{
+
+let spark=document.createElement("div")
+spark.innerHTML="✨"
+spark.style.position="fixed"
+spark.style.left=e.clientX+"px"
+spark.style.top=e.clientY+"px"
+spark.style.pointerEvents="none"
+
+document.body.appendChild(spark)
+
+setTimeout(()=>spark.remove(),400)
+
+})
+
+/* shooting star */
+
+function shootingStar(){
+
+let star=document.createElement("div")
+star.innerHTML="🌠"
+
+star.style.position="fixed"
+star.style.left="-50px"
+star.style.top=Math.random()*50+"vh"
+
+document.body.appendChild(star)
+
+let pos=-50
+
+let anim=setInterval(()=>{
+
+pos+=12
+star.style.left=pos+"px"
+
+if(pos>window.innerWidth){
+clearInterval(anim)
+star.remove()
+}
+
+},20)
+
+}
+
+setInterval(shootingStar,6000)
+
+/* gift */
+
+function giftBox(){
+
+let gift=document.createElement("div")
+gift.innerHTML="🎁"
+
+gift.style.position="fixed"
+gift.style.bottom="20px"
+gift.style.left=Math.random()*80+"vw"
+gift.style.fontSize="40px"
+gift.style.cursor="pointer"
+
+document.body.appendChild(gift)
+
+gift.onclick=function(){
+
+confetti({particleCount:150,spread:100})
+bigFirework()
+
+gift.remove()
+
+}
+
+setTimeout(()=>gift.remove(),10000)
+
+}
+
+setInterval(giftBox,20000)
+/* ================= EXTRA ULTRA EFFECT ================= */
+
+/* AUTO FIREWORKS */
+
+setInterval(()=>{
+
+if(Math.random()<0.5){
+
+bigFirework()
+
+confetti({
+particleCount:80,
+spread:100
+})
+
+}
+
+},8000)
+
+
+/* SPARKLE RANDOM */
+
+setInterval(()=>{
+
+let spark=document.createElement("div")
+
+spark.innerHTML="✨"
+
+spark.style.position="fixed"
+spark.style.left=Math.random()*100+"vw"
+spark.style.top=Math.random()*100+"vh"
+spark.style.fontSize="18px"
+
+document.body.appendChild(spark)
+
+setTimeout(()=>spark.remove(),1200)
+
+},700)
+
+
+/* LOVE LETTER */
+
+function loveLetter(){
+
+let box=document.createElement("div")
+
+box.style.position="fixed"
+box.style.top="50%"
+box.style.left="50%"
+box.style.transform="translate(-50%,-50%)"
+box.style.background="white"
+box.style.color="black"
+box.style.padding="30px"
+box.style.borderRadius="20px"
+box.style.maxWidth="400px"
+box.style.boxShadow="0 0 40px pink"
+box.style.zIndex="9999"
+
+box.innerHTML=`
+<h2>💌 Untuk Felicia</h2>
+<p>
+Felicia, mungkin kata-kata ini sederhana,  
+tapi semoga bisa membuatmu tersenyum.
+
+Terima kasih sudah menjadi seseorang yang spesial.  
+Semoga semua kebahagiaan selalu menemukan jalan menuju dirimu.
+
+Selamat ulang tahun Felicia 💖
+</p>
+
+<button onclick="this.parentElement.remove()">Close</button>
+`
+
+document.body.appendChild(box)
+
+}
+
+/* SECRET GIFT */
+
+function secretGift(){
+
+let gift=document.createElement("div")
+
+gift.innerHTML="🎁"
+
+gift.style.position="fixed"
+gift.style.right="20px"
+gift.style.bottom="20px"
+gift.style.fontSize="45px"
+gift.style.cursor="pointer"
+
+document.body.appendChild(gift)
+
+gift.onclick=function(){
+
+confetti({
+particleCount:300,
+spread:180
+})
+
+bigFirework()
+loveLetter()
+
+gift.remove()
+
+}
+
+}
+
+setTimeout(secretGift,15000)
+
+
+/* GAME ACHIEVEMENT */
+
+setInterval(()=>{
+
+if(score>=20){
+
+alert("🔥 WOW! Score kamu hebat!")
+
+confetti({
+particleCount:200,
+spread:140
+})
+
+score=0
+
+}
+
+},3000)
+
+
+/* BIRTHDAY MODE */
+
+setInterval(()=>{
+
+let txt=document.getElementById("countdown").innerText
+
+if(txt.includes("0 hari") && txt.includes("0 jam")){
+
+confetti({
+particleCount:500,
+spread:200
+})
+
+emojiRain()
+hearts()
+
+}
+
+},2000)
+
+
+/* CANDLE BLOW EFFECT */
+
+function blowCandle(){
+
+for(let i=0;i<20;i++){
+
+let smoke=document.createElement("div")
+
+smoke.innerHTML="💨"
+
+smoke.style.position="fixed"
+smoke.style.left="50%"
+smoke.style.top="60%"
+smoke.style.fontSize="30px"
+
+document.body.appendChild(smoke)
+
+setTimeout(()=>smoke.remove(),1500)
+
+}
+
+bigFirework()
+
+}
+
+/* DOUBLE CLICK CAKE */
+
+document.querySelector(".cake").ondblclick=blowCandle
+
+
+/* COMBO SCORE EFFECT */
+
+let combo=0
+
+document.addEventListener("click",()=>{
+
+combo++
+
+if(combo>=10){
+
+let txt=document.createElement("div")
+
+txt.innerHTML="COMBO 💖"
+
+txt.style.position="fixed"
+txt.style.top="50%"
+txt.style.left="50%"
+txt.style.fontSize="40px"
+txt.style.transform="translate(-50%,-50%)"
+
+document.body.appendChild(txt)
+
+setTimeout(()=>txt.remove(),1500)
+
+combo=0
+
+}
+
+})
+/* ================= ULTRA EXTRA ADDITION ================= */
+
+/* AUTO MUSIC AFTER LOADING */
+
+window.addEventListener("load",()=>{
+
+setTimeout(()=>{
+document.getElementById("music").play().catch(()=>{})
+},2000)
+
+})
+
+
+/* GALAXY BACKGROUND */
+
+let galaxy=document.createElement("canvas")
+galaxy.style.position="fixed"
+galaxy.style.top=0
+galaxy.style.left=0
+galaxy.style.zIndex="-1"
+
+document.body.appendChild(galaxy)
+
+let gctx=galaxy.getContext("2d")
+
+function resizeGalaxy(){
+
+galaxy.width=window.innerWidth
+galaxy.height=window.innerHeight
+
+}
+
+resizeGalaxy()
+
+window.addEventListener("resize",resizeGalaxy)
+
+let gstars=[]
+
+for(let i=0;i<120;i++){
+
+gstars.push({
+x:Math.random()*galaxy.width,
+y:Math.random()*galaxy.height,
+size:Math.random()*2,
+vx:(Math.random()-0.5)*0.3,
+vy:(Math.random()-0.5)*0.3
+})
+
+}
+
+function animateGalaxy(){
+
+gctx.clearRect(0,0,galaxy.width,galaxy.height)
+
+gstars.forEach(s=>{
+
+s.x+=s.vx
+s.y+=s.vy
+
+if(s.x<0)s.x=galaxy.width
+if(s.x>galaxy.width)s.x=0
+if(s.y<0)s.y=galaxy.height
+if(s.y>galaxy.height)s.y=0
+
+gctx.fillStyle="white"
+gctx.fillRect(s.x,s.y,s.size,s.size)
+
+})
+
+requestAnimationFrame(animateGalaxy)
+
+}
+
+animateGalaxy()
+
+
+/* FLOATING LOVE TEXT */
+
+let loveTexts=[
+"Felicia kamu luar biasa 💖",
+"Selamat ulang tahun Felicia 🎂",
+"Semoga harimu penuh kebahagiaan ✨",
+"Kamu spesial 💕",
+"Wish you happiness forever 🌸"
+]
+
+function floatingText(){
+
+let t=document.createElement("div")
+
+t.innerHTML=loveTexts[Math.floor(Math.random()*loveTexts.length)]
+
+t.style.position="fixed"
+t.style.left=Math.random()*100+"vw"
+t.style.bottom="-40px"
+t.style.fontSize="18px"
+
+document.body.appendChild(t)
+
+let pos=-40
+
+let rise=setInterval(()=>{
+
+pos+=2
+t.style.bottom=pos+"px"
+
+if(pos>window.innerHeight){
+
+clearInterval(rise)
+t.remove()
+
+}
+
+},20)
+
+}
+
+setInterval(floatingText,6000)
+
+
+/* HIGH SCORE GAME */
+
+let highScore=localStorage.getItem("feliciaHighScore") || 0
+
+function checkHighScore(){
+
+if(score>highScore){
+
+highScore=score
+localStorage.setItem("feliciaHighScore",score)
+
+let msg=document.createElement("div")
+
+msg.innerHTML="🏆 NEW HIGH SCORE: "+score
+
+msg.style.position="fixed"
+msg.style.top="40%"
+msg.style.left="50%"
+msg.style.transform="translate(-50%,-50%)"
+msg.style.fontSize="35px"
+
+document.body.appendChild(msg)
+
+setTimeout(()=>msg.remove(),3000)
+
+}
+
+}
+
+setInterval(checkHighScore,2000)
+
+
+/* GAME LEVEL SYSTEM */
+
+let level=1
+
+setInterval(()=>{
+
+if(score>=level*10){
+
+level++
+
+let txt=document.createElement("div")
+
+txt.innerHTML="LEVEL UP "+level+" 🚀"
+
+txt.style.position="fixed"
+txt.style.top="30%"
+txt.style.left="50%"
+txt.style.transform="translate(-50%,-50%)"
+txt.style.fontSize="40px"
+
+document.body.appendChild(txt)
+
+confetti({
+particleCount:200,
+spread:150
+})
+
+setTimeout(()=>txt.remove(),2000)
+
+}
+
+},2000)
+
+
+/* BACKGROUND COLOR SHIFT */
+
+let colors=[
+"#ff9ecf",
+"#ff6fb1",
+"#ff3e9d",
+"#ff7bc7",
+"#ff4aa2"
+]
+
+setInterval(()=>{
+
+let c1=colors[Math.floor(Math.random()*colors.length)]
+let c2=colors[Math.floor(Math.random()*colors.length)]
+let c3=colors[Math.floor(Math.random()*colors.length)]
+
+document.body.style.background=
+"linear-gradient(135deg,"+c1+","+c2+","+c3+")"
+
+},15000)
+
+
+/* METEOR SHOWER */
+
+function meteor(){
+
+let m=document.createElement("div")
+
+m.innerHTML="☄️"
+
+m.style.position="fixed"
+m.style.left="-50px"
+m.style.top=Math.random()*50+"vh"
+m.style.fontSize="30px"
+
+document.body.appendChild(m)
+
+let pos=-50
+
+let fly=setInterval(()=>{
+
+pos+=15
+m.style.left=pos+"px"
+
+if(pos>window.innerWidth){
+
+clearInterval(fly)
+m.remove()
+
+}
+
+},20)
+
+}
+
+setInterval(meteor,9000)
+/* ================= SUPER UPGRADE ADDITION ================= */
+
+/* MOUSE HEART TRAIL */
+
+document.addEventListener("mousemove",(e)=>{
+
+let heart=document.createElement("div")
+
+heart.innerHTML="💖"
+heart.style.position="fixed"
+heart.style.left=e.clientX+"px"
+heart.style.top=e.clientY+"px"
+heart.style.pointerEvents="none"
+heart.style.fontSize="14px"
+
+document.body.appendChild(heart)
+
+setTimeout(()=>heart.remove(),500)
+
+})
+
+
+/* FLOATING HEARTS BACKGROUND */
+
+function backgroundHearts(){
+
+let h=document.createElement("div")
+
+h.innerHTML="💗"
+h.style.position="fixed"
+h.style.left=Math.random()*100+"vw"
+h.style.bottom="-30px"
+h.style.fontSize="20px"
+
+document.body.appendChild(h)
+
+let pos=-30
+
+let fly=setInterval(()=>{
+
+pos+=2
+h.style.bottom=pos+"px"
+
+if(pos>window.innerHeight){
+
+clearInterval(fly)
+h.remove()
+
+}
+
+},20)
+
+}
+
+setInterval(backgroundHearts,2000)
+
+
+/* RANDOM GIFT SPAWN */
+
+function randomGift(){
+
+let gift=document.createElement("div")
+
+gift.innerHTML="🎁"
+gift.style.position="fixed"
+gift.style.left=Math.random()*90+"vw"
+gift.style.top=Math.random()*80+"vh"
+gift.style.fontSize="40px"
+gift.style.cursor="pointer"
+
+document.body.appendChild(gift)
+
+gift.onclick=function(){
+
+confetti({
+particleCount:200,
+spread:160
+})
+
+alert("🎉 Surprise untuk Felicia!")
+
+gift.remove()
+
+}
+
+setTimeout(()=>gift.remove(),8000)
+
+}
+
+setInterval(randomGift,25000)
+
+
+/* GAME TIMER */
+
+let gameTime=30
+let gameTimer
+
+function startGameTimer(){
+
+gameTime=30
+
+let timer=document.createElement("div")
+
+timer.id="gameTimer"
+timer.innerHTML="Time: 30"
+timer.style.position="absolute"
+timer.style.top="40px"
+timer.style.left="10px"
+
+document.getElementById("game").appendChild(timer)
+
+gameTimer=setInterval(()=>{
+
+gameTime--
+
+timer.innerHTML="Time: "+gameTime
+
+if(gameTime<=0){
+
+clearInterval(gameTimer)
+
+alert("Game Over! Score kamu: "+score)
+
+stopGame()
+
+timer.remove()
+
+}
+
+},1000)
+
+}
+
+/* jalankan timer saat game start */
+
+let originalStartGame=startGame
+
+startGame=function(){
+
+originalStartGame()
+
+startGameTimer()
+
+}
+
+
+/* HIGH SCORE DISPLAY */
+
+let hs=localStorage.getItem("feliciaHS") || 0
+
+function updateHS(){
+
+if(score>hs){
+
+hs=score
+localStorage.setItem("feliciaHS",score)
+
+let msg=document.createElement("div")
+
+msg.innerHTML="🏆 High Score Baru: "+score
+
+msg.style.position="fixed"
+msg.style.top="35%"
+msg.style.left="50%"
+msg.style.transform="translate(-50%,-50%)"
+msg.style.fontSize="35px"
+
+document.body.appendChild(msg)
+
+setTimeout(()=>msg.remove(),3000)
+
+}
+
+}
+
+setInterval(updateHS,2000)
+
+
+/* BIRTHDAY POPUP SPECIAL */
+
+function birthdayPopup(){
+
+let box=document.createElement("div")
+
+box.style.position="fixed"
+box.style.top="50%"
+box.style.left="50%"
+box.style.transform="translate(-50%,-50%)"
+box.style.background="white"
+box.style.color="black"
+box.style.padding="40px"
+box.style.borderRadius="20px"
+box.style.boxShadow="0 0 40px pink"
+box.style.zIndex="9999"
+
+box.innerHTML=`
+<h1>🎉 Happy Birthday Felicia 🎉</h1>
+<p>Semoga semua impianmu tercapai dan harimu penuh kebahagiaan!</p>
+<button onclick="this.parentElement.remove()">Close</button>
+`
+
+document.body.appendChild(box)
+
+confetti({
+particleCount:400,
+spread:200
+})
+
+}
+
+/* muncul setelah 10 detik buka web */
+
+setTimeout(birthdayPopup,10000)
+/* ================= ULTIMATE GOD MODE ADDITION ================= */
+
+/* BONUS STAR DI GAME */
+
+function spawnStar(){
+
+let star=document.createElement("div")
+
+star.innerHTML="⭐"
+star.style.position="absolute"
+star.style.fontSize="35px"
+star.style.cursor="pointer"
+
+star.style.left=Math.random()*90+"%"
+star.style.top=Math.random()*250+"px"
+
+star.onclick=function(){
+
+score+=5
+
+document.getElementById("score").innerText="Score : "+score
+
+confetti({
+particleCount:100,
+spread:120
+})
+
+star.remove()
+
+}
+
+document.getElementById("game").appendChild(star)
+
+setTimeout(()=>star.remove(),4000)
+
+}
+
+setInterval(()=>{
+
+if(document.getElementById("game").style.display=="block"){
+
+spawnStar()
+
+}
+
+},5000)
+
+
+/* BOMB OBSTACLE */
+
+function spawnBomb(){
+
+let bomb=document.createElement("div")
+
+bomb.innerHTML="💣"
+bomb.style.position="absolute"
+bomb.style.fontSize="35px"
+bomb.style.cursor="pointer"
+
+bomb.style.left=Math.random()*90+"%"
+bomb.style.top=Math.random()*250+"px"
+
+bomb.onclick=function(){
+
+alert("💥 BOOM! Score reset!")
+
+score=0
+document.getElementById("score").innerText="Score : 0"
+
+bomb.remove()
+
+}
+
+document.getElementById("game").appendChild(bomb)
+
+setTimeout(()=>bomb.remove(),4000)
+
+}
+
+setInterval(()=>{
+
+if(document.getElementById("game").style.display=="block"){
+
+spawnBomb()
+
+}
+
+},6000)
+
+
+/* GAME BOSS MODE */
+
+function spawnBoss(){
+
+let boss=document.createElement("div")
+
+boss.innerHTML="👑"
+boss.style.position="absolute"
+boss.style.fontSize="60px"
+boss.style.cursor="pointer"
+
+boss.style.left="40%"
+boss.style.top="120px"
+
+let hp=10
+
+boss.onclick=function(){
+
+hp--
+
+confetti({particleCount:30})
+
+if(hp<=0){
+
+score+=20
+
+document.getElementById("score").innerText="Score : "+score
+
+alert("🔥 Boss defeated!")
+
+boss.remove()
+
+}
+
+}
+
+document.getElementById("game").appendChild(boss)
+
+}
+
+setInterval(()=>{
+
+if(score>=30 && document.getElementById("game").style.display=="block"){
+
+spawnBoss()
+
+}
+
+},8000)
+
+
+/* PARALLAX GALAXY */
+
+document.addEventListener("mousemove",(e)=>{
+
+let stars=document.querySelectorAll(".star")
+
+stars.forEach(s=>{
+
+let speed=0.02
+
+let x=(window.innerWidth/2 - e.clientX)*speed
+let y=(window.innerHeight/2 - e.clientY)*speed
+
+s.style.transform=`translate(${x}px,${y}px)`
+
+})
+
+})
+
+
+/* RANDOM LOVE MESSAGE */
+
+let loveMsg=[
+"Felicia kamu luar biasa 💖",
+"Selamat ulang tahun Felicia 🎂",
+"Semoga kebahagiaan selalu bersamamu ✨",
+"Kamu spesial 🌸",
+"Stay awesome Felicia 💕"
+]
+
+function randomLove(){
+
+let msg=document.createElement("div")
+
+msg.innerHTML=loveMsg[Math.floor(Math.random()*loveMsg.length)]
+
+msg.style.position="fixed"
+msg.style.top=Math.random()*80+"vh"
+msg.style.left=Math.random()*80+"vw"
+
+document.body.appendChild(msg)
+
+setTimeout(()=>msg.remove(),3000)
+
+}
+
+setInterval(randomLove,9000)
+
+
+/* SECRET EASTER EGG */
+
+let secretClick=0
+
+document.addEventListener("click",()=>{
+
+secretClick++
+
+if(secretClick>=5){
+
+let box=document.createElement("div")
+
+box.style.position="fixed"
+box.style.top="50%"
+box.style.left="50%"
+box.style.transform="translate(-50%,-50%)"
+box.style.background="white"
+box.style.color="black"
+box.style.padding="30px"
+box.style.borderRadius="20px"
+
+box.innerHTML="🎁 SECRET MESSAGE: Felicia kamu spesial!"
+
+document.body.appendChild(box)
+
+confetti({
+particleCount:300,
+spread:180
+})
+
+setTimeout(()=>box.remove(),4000)
+
+secretClick=0
+
+}
+
+})
+
+
+/* SIMPLE LEADERBOARD */
+
+let board=document.createElement("div")
+
+board.style.position="fixed"
+board.style.right="10px"
+board.style.top="50%"
+board.style.background="rgba(0,0,0,0.5)"
+board.style.padding="10px"
+board.style.borderRadius="10px"
+
+board.innerHTML="🏆 Best Score: 0"
+
+document.body.appendChild(board)
+
+setInterval(()=>{
+
+let best=localStorage.getItem("felicia_best") || 0
+
+if(score>best){
+
+best=score
+localStorage.setItem("felicia_best",score)
+
+}
+
+board.innerHTML="🏆 Best Score: "+best
+
+},2000)
+/* ================= FINAL LEGEND UPGRADE ================= */
+
+/* ARCADE SPEED MODE */
+
+let speedLevel=1
+
+setInterval(()=>{
+
+if(score>=speedLevel*15){
+
+speedLevel++
+
+clearInterval(heartInterval)
+
+heartInterval=setInterval(spawnHeart,1000-(speedLevel*80))
+
+let txt=document.createElement("div")
+
+txt.innerHTML="⚡ SPEED LEVEL "+speedLevel
+
+txt.style.position="fixed"
+txt.style.top="20%"
+txt.style.left="50%"
+txt.style.transform="translate(-50%,-50%)"
+txt.style.fontSize="40px"
+
+document.body.appendChild(txt)
+
+setTimeout(()=>txt.remove(),2000)
+
+}
+
+},2000)
+
+
+/* TARGET COMBO SYSTEM */
+
+let targetScore=50
+
+setInterval(()=>{
+
+if(score>=targetScore){
+
+confetti({
+particleCount:500,
+spread:200
+})
+
+bigFirework()
+
+alert("🎉 TARGET SCORE TERCAPAI!")
+
+targetScore+=50
+
+}
+
+},2000)
+
+
+/* 3D PARALLAX BACKGROUND */
+
+document.addEventListener("mousemove",(e)=>{
+
+let stars=document.querySelectorAll(".star")
+
+stars.forEach((s,index)=>{
+
+let depth=(index%5)/5
+
+let moveX=(window.innerWidth/2 - e.clientX)*depth*0.02
+let moveY=(window.innerHeight/2 - e.clientY)*depth*0.02
+
+s.style.transform=`translate(${moveX}px,${moveY}px)`
+
+})
+
+})
+
+
+/* TREASURE HUNT */
+
+function spawnTreasure(){
+
+let t=document.createElement("div")
+
+t.innerHTML="💎"
+
+t.style.position="fixed"
+t.style.left=Math.random()*90+"vw"
+t.style.top=Math.random()*80+"vh"
+t.style.fontSize="35px"
+t.style.cursor="pointer"
+
+document.body.appendChild(t)
+
+t.onclick=function(){
+
+score+=10
+
+confetti({
+particleCount:150,
+spread:160
+})
+
+alert("💎 Treasure ditemukan!")
+
+t.remove()
+
+}
+
+setTimeout(()=>t.remove(),10000)
+
+}
+
+setInterval(spawnTreasure,30000)
+
+
+/* LOVE QUOTES */
+
+let quotes=[
+"Felicia kamu hebat 💖",
+"Semoga semua mimpimu tercapai ✨",
+"Kamu membuat dunia lebih indah 🌸",
+"Happy Birthday Felicia 🎂",
+"Keep shining ⭐"
+]
+
+function showQuote(){
+
+let q=document.createElement("div")
+
+q.innerHTML=quotes[Math.floor(Math.random()*quotes.length)]
+
+q.style.position="fixed"
+q.style.bottom="20px"
+q.style.left=Math.random()*80+"vw"
+q.style.fontSize="18px"
+
+document.body.appendChild(q)
+
+setTimeout(()=>q.remove(),4000)
+
+}
+
+setInterval(showQuote,7000)
+
+
+/* MEGA FIREWORKS */
+
+function megaFirework(){
+
+for(let i=0;i<6;i++){
+
+setTimeout(()=>{
+
+bigFirework()
+
+confetti({
+particleCount:300,
+spread:180
+})
+
+},i*400)
+
+}
+
+}
+
+setInterval(megaFirework,25000)
+
+
+/* SUPER CAKE EFFECT */
+
+document.querySelector(".cake").addEventListener("click",()=>{
+
+let txt=document.createElement("div")
+
+txt.innerHTML="🎂 MAKE A WISH FELICIA!"
+
+txt.style.position="fixed"
+txt.style.top="45%"
+txt.style.left="50%"
+txt.style.transform="translate(-50%,-50%)"
+txt.style.fontSize="45px"
+
+document.body.appendChild(txt)
+
+setTimeout(()=>txt.remove(),2500)
+
+megaFirework()
+
+})
+/* ================= ULTRA BIRTHDAY MODE ================= */
+
+/* LOVE METER */
+
+let loveMeter=0
+
+let meter=document.createElement("div")
+meter.style.position="fixed"
+meter.style.left="10px"
+meter.style.bottom="10px"
+meter.style.background="rgba(0,0,0,0.5)"
+meter.style.padding="10px"
+meter.style.borderRadius="10px"
+meter.innerHTML="💖 Love Meter: 0"
+
+document.body.appendChild(meter)
+
+document.addEventListener("click",()=>{
+
+loveMeter++
+
+meter.innerHTML="💖 Love Meter: "+loveMeter
+
+if(loveMeter%20==0){
+
+confetti({
+particleCount:200,
+spread:150
+})
+
+}
+
+})
+
+
+/* MYSTERY BOX */
+
+function mysteryBox(){
+
+let box=document.createElement("div")
+
+box.innerHTML="📦"
+box.style.position="fixed"
+box.style.left=Math.random()*90+"vw"
+box.style.top=Math.random()*80+"vh"
+box.style.fontSize="40px"
+box.style.cursor="pointer"
+
+document.body.appendChild(box)
+
+box.onclick=function(){
+
+let rewards=["💎 +10 Score","💖 Love Boost","🎆 Fireworks"]
+
+let reward=rewards[Math.floor(Math.random()*rewards.length)]
+
+alert("Mystery Reward: "+reward)
+
+if(reward=="💎 +10 Score"){
+score+=10
+}
+
+if(reward=="🎆 Fireworks"){
+bigFirework()
+}
+
+box.remove()
+
+}
+
+setTimeout(()=>box.remove(),12000)
+
+}
+
+setInterval(mysteryBox,35000)
+
+
+/* AURORA BACKGROUND */
+
+let aurora=document.createElement("div")
+
+aurora.style.position="fixed"
+aurora.style.top="0"
+aurora.style.left="0"
+aurora.style.width="100%"
+aurora.style.height="100%"
+aurora.style.background="linear-gradient(120deg,rgba(255,0,150,0.2),rgba(0,200,255,0.2))"
+aurora.style.animation="auroraMove 10s infinite alternate"
+aurora.style.pointerEvents="none"
+
+document.body.appendChild(aurora)
+
+let style=document.createElement("style")
+style.innerHTML=`
+@keyframes auroraMove{
+0%{filter:hue-rotate(0deg)}
+100%{filter:hue-rotate(360deg)}
+}
+`
+document.head.appendChild(style)
+
+
+/* SUPER CELEBRATION MODE */
+
+function superCelebration(){
+
+for(let i=0;i<10;i++){
+
+setTimeout(()=>{
+
+confetti({
+particleCount:300,
+spread:180
+})
+
+bigFirework()
+
+},i*400)
+
+}
+
+}
+
+setInterval(()=>{
+
+if(score>=100){
+
+superCelebration()
+
+alert("🔥 LEGEND SCORE!")
+
+score=0
+
+}
+
+},3000)
+
+
+/* FLAPPY HEART MINI GAME BUTTON */
+
+let flappyBtn=document.createElement("button")
+
+flappyBtn.innerText="🎮 Flappy Heart"
+flappyBtn.style.position="fixed"
+flappyBtn.style.left="10px"
+flappyBtn.style.top="50%"
+
+document.body.appendChild(flappyBtn)
+
+flappyBtn.onclick=function(){
+
+alert("Flappy Heart mode coming soon ❤️")
+
+}
+
+
+/* MICROPHONE BLOW CANDLE */
+
+async function enableMicBlow(){
+
+try{
+
+let stream=await navigator.mediaDevices.getUserMedia({audio:true})
+
+let audioCtx=new AudioContext()
+
+let mic=audioCtx.createMediaStreamSource(stream)
+
+let analyser=audioCtx.createAnalyser()
+
+mic.connect(analyser)
+
+let data=new Uint8Array(analyser.frequencyBinCount)
+
+function detectBlow(){
+
+analyser.getByteFrequencyData(data)
+
+let volume=data.reduce((a,b)=>a+b)/data.length
+
+if(volume>60){
+
+blowCandle()
+
+}
+
+requestAnimationFrame(detectBlow)
+
+}
+
+detectBlow()
+
+}catch(e){
+
+console.log("Mic not allowed")
+
+}
+
+}
+
+enableMicBlow()
+/* ================= MEGA BIRTHDAY UPGRADE ================= */
+
+
+/* METEOR BACKGROUND */
+
+function createMeteor(){
+
+let meteor=document.createElement("div")
+
+meteor.innerHTML="☄️"
+
+meteor.style.position="fixed"
+meteor.style.left=Math.random()*100+"vw"
+meteor.style.top="-50px"
+meteor.style.fontSize="30px"
+meteor.style.zIndex="999"
+
+document.body.appendChild(meteor)
+
+let fall=setInterval(()=>{
+
+meteor.style.top=meteor.offsetTop+10+"px"
+meteor.style.left=meteor.offsetLeft-3+"px"
+
+if(meteor.offsetTop>window.innerHeight){
+
+clearInterval(fall)
+meteor.remove()
+
+}
+
+},30)
+
+}
+
+setInterval(createMeteor,5000)
+
+
+
+/* FLOATING HEARTS */
+
+function floatingHeart(){
+
+let heart=document.createElement("div")
+
+heart.innerHTML="💖"
+
+heart.style.position="fixed"
+heart.style.left=Math.random()*100+"vw"
+heart.style.bottom="-20px"
+heart.style.fontSize="20px"
+
+document.body.appendChild(heart)
+
+let rise=setInterval(()=>{
+
+heart.style.bottom=heart.offsetBottom+2+"px"
+heart.style.transform="scale("+(Math.random()+0.5)+")"
+
+if(heart.offsetTop<-50){
+
+clearInterval(rise)
+heart.remove()
+
+}
+
+},40)
+
+}
+
+setInterval(floatingHeart,1200)
+
+
+
+/* SECRET LETTER */
+
+let messages=[
+
+"Felicia kamu spesial banget 💖",
+"Semoga ulang tahun kamu penuh kebahagiaan 🎂",
+"Aku harap semua mimpi kamu tercapai ✨",
+"Kamu selalu bikin dunia lebih cerah 🌸",
+"Happy Birthday Felicia 💕"
+
+]
+
+function secretLetter(){
+
+let letter=document.createElement("div")
+
+letter.style.position="fixed"
+letter.style.top="40%"
+letter.style.left="50%"
+letter.style.transform="translate(-50%,-50%)"
+letter.style.background="white"
+letter.style.padding="20px"
+letter.style.borderRadius="15px"
+letter.style.boxShadow="0 0 20px rgba(0,0,0,0.3)"
+
+letter.innerHTML=messages[Math.floor(Math.random()*messages.length)]+"<br><br><button>Tutup</button>"
+
+document.body.appendChild(letter)
+
+letter.querySelector("button").onclick=()=>letter.remove()
+
+}
+
+setInterval(secretLetter,45000)
+
+
+
+/* MINI GAME TANGKAP HATI */
+
+let gameScore=0
+
+function spawnHeartGame(){
+
+let h=document.createElement("div")
+
+h.innerHTML="💗"
+
+h.style.position="fixed"
+h.style.left=Math.random()*90+"vw"
+h.style.top="0"
+h.style.fontSize="35px"
+h.style.cursor="pointer"
+
+document.body.appendChild(h)
+
+let fall=setInterval(()=>{
+
+h.style.top=h.offsetTop+5+"px"
+
+if(h.offsetTop>window.innerHeight){
+
+clearInterval(fall)
+h.remove()
+
+}
+
+},40)
+
+h.onclick=function(){
+
+gameScore++
+
+alert("Score: "+gameScore)
+
+confetti({
+particleCount:100,
+spread:100
+})
+
+h.remove()
+
+}
+
+}
+
+setInterval(spawnHeartGame,7000)
+
+
+
+/* INTERACTIVE CAKE */
+
+let cake2=document.createElement("div")
+
+cake.innerHTML="🎂"
+
+cake.style.position="fixed"
+cake.style.bottom="20px"
+cake.style.right="20px"
+cake.style.fontSize="60px"
+cake.style.cursor="pointer"
+
+document.body.appendChild(cake)
+
+cake.onclick=function(){
+
+confetti({
+particleCount:200,
+spread:120
+})
+
+alert("Kue dipotong! Happy Birthday Felicia 🎂")
+
+}
+
+
+
+/* GIFT POPUP */
+
+function randomGift(){
+
+let gifts=["🎁 Surprise!","💎 Rare Gift","🎆 Firework Bonus"]
+
+let g=gifts[Math.floor(Math.random()*gifts.length)]
+
+alert(g)
+
+if(g=="🎆 Firework Bonus"){
+bigFirework()
+}
+
+}
+
+setInterval(randomGift,60000)
+
+
+
+/* MEGA CELEBRATION */
+
+function megaCelebration(){
+
+for(let i=0;i<15;i++){
+
+setTimeout(()=>{
+
+confetti({
+particleCount:400,
+spread:200
+})
+
+bigFirework()
+
+},i*300)
+
+}
+
+}
+
+setTimeout(megaCelebration,20000)
+/* ================= FINAL GOD MODE ================= */
+
+
+/* SKY STAR ANIMATION */
+
+function createMovingStar(){
+
+let star=document.createElement("div")
+
+star.style.position="fixed"
+star.style.width="3px"
+star.style.height="3px"
+star.style.background="white"
+star.style.left=Math.random()*100+"vw"
+star.style.top="-10px"
+star.style.opacity="0.8"
+
+document.body.appendChild(star)
+
+let fall=setInterval(()=>{
+
+star.style.top=star.offsetTop+2+"px"
+
+if(star.offsetTop>window.innerHeight){
+
+clearInterval(fall)
+star.remove()
+
+}
+
+},40)
+
+}
+
+setInterval(createMovingStar,300)
+
+
+
+/* LOVE COUNTER */
+
+let loveCount=0
+
+let loveBox=document.createElement("div")
+
+loveBox.style.position="fixed"
+loveBox.style.top="10px"
+loveBox.style.right="10px"
+loveBox.style.background="rgba(0,0,0,0.6)"
+loveBox.style.color="white"
+loveBox.style.padding="10px"
+loveBox.style.borderRadius="10px"
+
+loveBox.innerHTML="💖 Love: 0"
+
+document.body.appendChild(loveBox)
+
+document.addEventListener("click",()=>{
+
+loveCount++
+
+loveBox.innerHTML="💖 Love: "+loveCount
+
+})
+
+
+
+/* INTERACTIVE CAKE WITH CANDLES */
+
+let cake3=document.createElement("div")
+
+cake.innerHTML="🎂🕯️"
+
+cake.style.position="fixed"
+cake.style.bottom="20px"
+cake.style.left="50%"
+cake.style.transform="translateX(-50%)"
+cake.style.fontSize="70px"
+cake.style.cursor="pointer"
+
+document.body.appendChild(cake)
+
+cake.onclick=function(){
+
+cake.innerHTML="🎂"
+
+confetti({
+particleCount:500,
+spread:200
+})
+
+alert("Felicia berhasil meniup lilin! 🎉")
+
+}
+
+
+
+/* PHOTO GALLERY */
+
+let galleryBtn=document.createElement("button")
+
+galleryBtn.innerText="📸 Gallery"
+
+galleryBtn.style.position="fixed"
+galleryBtn.style.top="60px"
+galleryBtn.style.left="20px"
+
+document.body.appendChild(galleryBtn)
+
+galleryBtn.onclick=function(){
+
+let gallery=document.createElement("div")
+
+gallery.style.position="fixed"
+gallery.style.top="50%"
+gallery.style.left="50%"
+gallery.style.transform="translate(-50%,-50%)"
+gallery.style.background="white"
+gallery.style.padding="20px"
+gallery.style.borderRadius="15px"
+
+gallery.innerHTML=`
+<h3>Kenangan Felicia</h3>
+<img src="https://picsum.photos/200?1">
+<img src="https://picsum.photos/200?2">
+<img src="https://picsum.photos/200?3">
+<br><br>
+<button onclick="this.parentElement.remove()">Tutup</button>
+`
+
+document.body.appendChild(gallery)
+
+}
+
+
+
+/* LOVE STORY POPUP */
+
+let storyBtn=document.createElement("button")
+
+storyBtn.innerText="💌 Story"
+
+storyBtn.style.position="fixed"
+storyBtn.style.top="100px"
+storyBtn.style.left="20px"
+
+document.body.appendChild(storyBtn)
+
+storyBtn.onclick=function(){
+
+let story=document.createElement("div")
+
+story.style.position="fixed"
+story.style.top="50%"
+story.style.left="50%"
+story.style.transform="translate(-50%,-50%)"
+story.style.background="white"
+story.style.padding="20px"
+story.style.borderRadius="15px"
+
+story.innerHTML=`
+<h3>Story</h3>
+<p>Hari ini adalah hari spesial Felicia 🎂</p>
+<p>Semoga semua impianmu tercapai ✨</p>
+<p>Dunia lebih indah karena kamu 💖</p>
+<br>
+<button onclick="this.parentElement.remove()">Tutup</button>
+`
+
+document.body.appendChild(story)
+
+}
+
+
+
+/* SECRET SURPRISE */
+
+let secretBtn=document.createElement("button")
+
+secretBtn.innerText="🎁 Secret"
+
+secretBtn.style.position="fixed"
+secretBtn.style.top="140px"
+secretBtn.style.left="20px"
+
+document.body.appendChild(secretBtn)
+
+secretBtn.onclick=function(){
+
+alert("SURPRISE!!! 🎉🎂💖")
+
+confetti({
+particleCount:600,
+spread:220
+})
+
+}
+
+
+
+/* METEOR DODGE GAME */
+
+let meteorGameBtn=document.createElement("button")
+
+meteorGameBtn.innerText="☄️ Dodge Meteor"
+
+meteorGameBtn.style.position="fixed"
+meteorGameBtn.style.top="180px"
+meteorGameBtn.style.left="20px"
+
+document.body.appendChild(meteorGameBtn)
+
+meteorGameBtn.onclick=function(){
+
+let player=document.createElement("div")
+
+player.innerHTML="💗"
+
+player.style.position="fixed"
+player.style.bottom="50px"
+player.style.left="50%"
+player.style.fontSize="40px"
+
+document.body.appendChild(player)
+
+document.addEventListener("mousemove",(e)=>{
+
+player.style.left=e.clientX+"px"
+
+})
+
+function meteor(){
+
+let m=document.createElement("div")
+
+m.innerHTML="☄️"
+
+m.style.position="fixed"
+m.style.top="-40px"
+m.style.left=Math.random()*100+"vw"
+m.style.fontSize="35px"
+
+document.body.appendChild(m)
+
+let fall=setInterval(()=>{
+
+m.style.top=m.offsetTop+6+"px"
+
+if(m.offsetTop>window.innerHeight){
+
+clearInterval(fall)
+m.remove()
+
+}
+
+},40)
+
+}
+
+setInterval(meteor,1000)
+
+}
+/* HEART RAIN */
+
+function heartRain(){
+
+let h=document.createElement("div")
+
+h.innerHTML="💖"
+
+h.style.position="fixed"
+h.style.left=Math.random()*100+"vw"
+h.style.top="-20px"
+h.style.fontSize="25px"
+
+document.body.appendChild(h)
+
+let fall=setInterval(()=>{
+
+h.style.top=h.offsetTop+4+"px"
+
+if(h.offsetTop>window.innerHeight){
+
+clearInterval(fall)
+h.remove()
+
+}
+
+},30)
+
+}
+
+setInterval(heartRain,800)
+
+
+
+/* TREASURE CHEST */
+
+function spawnTreasure(){
+
+let chest=document.createElement("div")
+
+chest.innerHTML="🧰"
+
+chest.style.position="fixed"
+chest.style.left=Math.random()*90+"vw"
+chest.style.top=Math.random()*80+"vh"
+chest.style.fontSize="40px"
+chest.style.cursor="pointer"
+
+document.body.appendChild(chest)
+
+chest.onclick=function(){
+
+confetti({
+particleCount:300,
+spread:160
+})
+
+alert("🎁 Kamu menemukan hadiah rahasia!")
+
+chest.remove()
+
+}
+
+setTimeout(()=>chest.remove(),15000)
+
+}
+
+setInterval(spawnTreasure,40000)
+
+
+
+/* RANDOM LOVE MESSAGE */
+
+let loveMessages=[
+
+"Felicia kamu luar biasa 💖",
+"Semoga semua impianmu tercapai ✨",
+"Selamat ulang tahun Felicia 🎂",
+"Kamu bikin dunia lebih indah 🌸",
+"Hari ini hari spesial kamu 💕"
+
+]
+
+function showLoveMessage(){
+
+let msg=document.createElement("div")
+
+msg.innerHTML=loveMessages[Math.floor(Math.random()*loveMessages.length)]
+
+msg.style.position="fixed"
+msg.style.top="20%"
+msg.style.left="50%"
+msg.style.transform="translateX(-50%)"
+msg.style.background="rgba(255,255,255,0.9)"
+msg.style.padding="15px"
+msg.style.borderRadius="10px"
+
+document.body.appendChild(msg)
+
+setTimeout(()=>msg.remove(),5000)
+
+}
+
+setInterval(showLoveMessage,30000)
+
+
+
+/* PLAYLIST BUTTON */
+
+let musicBtn=document.createElement("button")
+
+musicBtn.innerText="🎵 Play Music"
+
+musicBtn.style.position="fixed"
+musicBtn.style.bottom="20px"
+musicBtn.style.left="20px"
+
+document.body.appendChild(musicBtn)
+
+let songs=[
+
+"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+
+]
+
+let audio=new Audio()
+
+musicBtn.onclick=function(){
+
+audio.src=songs[Math.floor(Math.random()*songs.length)]
+
+audio.play()
+
+}
+
+
+
+/* FLAPPY HEART GAME */
+
+let gameBtn=document.createElement("button")
+
+gameBtn.innerText="🎮 Play Flappy Heart"
+
+gameBtn.style.position="fixed"
+gameBtn.style.top="20px"
+gameBtn.style.left="20px"
+
+document.body.appendChild(gameBtn)
+
+gameBtn.onclick=function(){
+
+let player=document.createElement("div")
+
+player.innerHTML="💗"
+
+player.style.position="fixed"
+player.style.left="100px"
+player.style.top="300px"
+player.style.fontSize="40px"
+
+document.body.appendChild(player)
+
+document.addEventListener("keydown",()=>{
+
+player.style.top=player.offsetTop-80+"px"
+
+})
+
+setInterval(()=>{
+
+player.style.top=player.offsetTop+5+"px"
+
+},30)
+
+}
+
+
+
+/* AUTO FIREWORK ON MARCH 13 */
+
+let today=new Date()
+
+if(today.getDate()==13 && today.getMonth()==2){
+
+setInterval(()=>{
+
+confetti({
+particleCount:400,
+spread:200
+})
+
+},3000)
+
+}
+/* ================= CINEMATIC FIREWORK SHOW ================= */
+
+function fireworkShow(){
+
+for(let i=0;i<12;i++){
+
+setTimeout(()=>{
+
+confetti({
+particleCount:400,
+spread:200,
+origin:{x:Math.random(),y:Math.random()}
+})
+
+bigFirework()
+
+},i*500)
+
+}
+
+}
+
+/* tombol firework show */
+
+let showBtn=document.createElement("button")
+
+showBtn.innerText="🎆 Firework Show"
+showBtn.style.position="fixed"
+showBtn.style.right="20px"
+showBtn.style.top="20px"
+
+document.body.appendChild(showBtn)
+
+showBtn.onclick=fireworkShow
+
+
+
+/* ================= NEBULA GALAXY BACKGROUND ================= */
+
+let nebula=document.createElement("div")
+
+nebula.style.position="fixed"
+nebula.style.top="0"
+nebula.style.left="0"
+nebula.style.width="100%"
+nebula.style.height="100%"
+nebula.style.background=
+"radial-gradient(circle at 20% 30%,rgba(255,0,200,0.2),transparent),"+
+"radial-gradient(circle at 70% 60%,rgba(0,200,255,0.2),transparent)"
+
+nebula.style.zIndex="-2"
+
+document.body.appendChild(nebula)
+
+
+
+/* ================= FLOATING CHAT WISH ================= */
+
+let wishes=[
+"Selamat ulang tahun Felicia 🎂",
+"Semoga harimu indah 💖",
+"Wish you happiness ✨",
+"Kamu luar biasa 🌸",
+"Happy Birthday 🎉"
+]
+
+function chatWish(){
+
+let bubble=document.createElement("div")
+
+bubble.innerHTML=wishes[Math.floor(Math.random()*wishes.length)]
+
+bubble.style.position="fixed"
+bubble.style.left=Math.random()*80+"vw"
+bubble.style.bottom="0"
+bubble.style.background="white"
+bubble.style.color="black"
+bubble.style.padding="10px"
+bubble.style.borderRadius="10px"
+bubble.style.fontSize="14px"
+
+document.body.appendChild(bubble)
+
+let pos=0
+
+let rise=setInterval(()=>{
+
+pos+=2
+bubble.style.bottom=pos+"px"
+
+if(pos>window.innerHeight){
+
+clearInterval(rise)
+bubble.remove()
+
+}
+
+},20)
+
+}
+
+setInterval(chatWish,9000)
+
+
+
+/* ================= SPINNING 3D CAKE ================= */
+
+let cake3D=document.createElement("div")
+
+cake3D.innerHTML="🎂"
+
+cake3D.style.position="fixed"
+cake3D.style.right="20px"
+cake3D.style.bottom="20px"
+cake3D.style.fontSize="70px"
+cake3D.style.animation="spinCake 6s linear infinite"
+cake3D.style.cursor="pointer"
+
+document.body.appendChild(cake3D)
+
+let cakeStyle=document.createElement("style")
+
+cakeStyle.innerHTML=`
+@keyframes spinCake{
+0%{transform:rotateY(0deg)}
+100%{transform:rotateY(360deg)}
+}
+`
+
+document.head.appendChild(cakeStyle)
+
+cake3D.onclick=function(){
+
+fireworkShow()
+
+alert("Make a wish Felicia! 🎂")
+
+}
+
+
+
+/* ================= GLOBAL LEADERBOARD ================= */
+
+let leader=document.createElement("div")
+
+leader.style.position="fixed"
+leader.style.left="10px"
+leader.style.top="200px"
+leader.style.background="rgba(0,0,0,0.6)"
+leader.style.padding="10px"
+leader.style.borderRadius="10px"
+
+leader.innerHTML="🏆 Felicia Champion"
+
+document.body.appendChild(leader)
+
+
+
+/* ================= SUPER PARTICLE BURST ================= */
+
+function particleBurst(x,y){
+
+for(let i=0;i<50;i++){
+
+let p=document.createElement("div")
+
+p.innerHTML="✨"
+
+p.style.position="fixed"
+p.style.left=x+"px"
+p.style.top=y+"px"
+
+document.body.appendChild(p)
+
+let vx=(Math.random()-0.5)*10
+let vy=(Math.random()-0.5)*10
+
+let life=40
+
+let anim=setInterval(()=>{
+
+p.style.left=(p.offsetLeft+vx)+"px"
+p.style.top=(p.offsetTop+vy)+"px"
+
+life--
+
+if(life<=0){
+
+clearInterval(anim)
+p.remove()
+
+}
+
+},20)
+
+}
+
+}
+
+document.addEventListener("click",(e)=>{
+
+particleBurst(e.clientX,e.clientY)
+
+})
+
+</script>
+
+</body>
+</html>
